@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capstone-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: capstone-backend
+  template:
+    metadata:
+      labels:
+        app: capstone-backend
+    spec:
+      containers:
+        - name: capstone-backend
+          image: capstone-backend
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capstone-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: capstone-frontend
+  template:
+    metadata:
+      labels:
+        app: capstone-frontend
+    spec:
+      containers:
+      - name: capstone-frontend
+        image: capstone-frontend:latest
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 80
