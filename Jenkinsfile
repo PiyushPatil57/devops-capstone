@@ -1,27 +1,61 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage('Clone') {
-      steps {
-        git branch: 'main', url: 'https://github.com/KumarGaurav-tech/devops-capstone.git'
-      }
+    environment {
+        DOCKER_HUB_USER = 'your_dockerhub_username'
+        DOCKER_HUB_PASS = credentials('dockerhub-credentials')
+        GITHUB_CRED = credentials('github-credentials')
     }
 
-    stage('Build Docker Image') {
-      steps {
-        sh 'docker build -t capstone-backend ./backend'
-      }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', 
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/PiyushPatil57/devops-capstone.git'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                sh 'docker build -t capstone-backend ./backend'
+                sh 'docker build -t capstone-frontend ./frontend'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                sh '''
+                echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
+                docker tag capstone-backend $DOCKER_HUB_USER/capstone-backend:latest
+                docker tag capstone-frontend $DOCKER_HUB_USER/capstone-frontend:latest
+                docker push $DOCKER_HUB_USER/capstone-backend:latest
+                docker push $DOCKER_HUB_USER/capstone-frontend:latest
+                '''
+            }
+        }
+
+
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/backend-deployment.yaml
+                kubectl apply -f k8s/frontend-deployment.yaml
+                kubectl apply -f k8s/backend-service.yaml
+                kubectl apply -f k8s/frontend-service.yaml
+                '''
+            }
+        }
     }
 
-    stage('Deploy to K8s') {
-      steps {
-        sh '''
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-        '''
-      }
+    post {
+        success {
+            echo '✅ Deployment completed successfully!'
+        }
+        failure {
+            echo '❌ Build or Deployment Failed.'
+        }
     }
-  }
 }
 
