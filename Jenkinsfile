@@ -4,14 +4,14 @@ pipeline {
     environment {
         DOCKER_HUB_USER = 'your_dockerhub_username'
         DOCKER_HUB_PASS = credentials('dockerhub-credentials')
-        GITHUB_CRED = credentials('github-credentials')
+        GITHUB_CRED = credentials('capstone')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', 
-                    credentialsId: 'github-credentials',
+                git branch: 'main',
+                    credentialsId: 'capstone',
                     url: 'https://github.com/PiyushPatil57/devops-capstone.git'
             }
         }
@@ -34,8 +34,6 @@ pipeline {
                 '''
             }
         }
-
-
 
         stage('Deploy to Kubernetes') {
             steps {
